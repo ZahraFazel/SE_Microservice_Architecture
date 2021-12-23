@@ -1,0 +1,21 @@
+# Project exclude paths
+Admin/.idea/
+Admin/__pycache__/
+Admin/Admin/__pycache__/
+Admin/administrator/__pycache__/
+Admin/administrator/migrations/
+API_Gateway/.idea/
+API_Gateway/__pycache__/
+API_Gateway/API_Gateway/__pycache__/
+API_Gateway/administrator/__pycache__/
+API_Gateway/administrator/migrations/
+Doctor/.idea/
+Doctor/__pycache__/
+Doctor/Doctor/__pycache__/
+Doctor/system_doctor/__pycache__/
+Doctor/system_doctor/migrations/
+Patient/.idea/
+Patient/__pycache__/
+Patient/Patient/__pycache__/
+Patient/system_patient/__pycache__/
+Patient/system_patient/migrations/

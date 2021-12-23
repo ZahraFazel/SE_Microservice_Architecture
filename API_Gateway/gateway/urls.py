@@ -8,4 +8,6 @@ from gateway import views
 app_name = "gateway"
 urlpatterns = [
     path('login_admin/', views.login_admin),
+    path('signup_doctor/', views.signup_doctor),
+    path('login_doctor/', views.login_doctor),
 ]

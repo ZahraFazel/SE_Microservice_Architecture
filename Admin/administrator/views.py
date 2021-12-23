@@ -19,5 +19,5 @@ def login_admin(request):
     user = authenticate(username=username, password=password)
     if not user:
         return JsonResponse({'error': 'Access denied!'}, status=HTTP_404_NOT_FOUND)
-    token, _ = Token.objects.get_or_create(user=user)
+    token = Token.objects.get_or_create(user=user)[0]
     return JsonResponse({'token': token.key}, status=HTTP_200_OK)
