@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.status import *
-from system_doctor.models import Doctor
+from system_patient.models import Patient
 
 
 @csrf_exempt
@@ -16,10 +16,10 @@ def signup(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     try:
-        doctor = Doctor.objects.create(name=name, national_code=national_code, username=name + str(national_code))
-        doctor.set_password(password)
-        doctor.save()
-        token = Token.objects.create(user=doctor)
+        patient = Patient.objects.create(name=name, national_code=national_code, username=name + str(national_code))
+        patient.set_password(password)
+        patient.save()
+        token = Token.objects.create(user=patient)
         return JsonResponse({'token': token.key}, status=HTTP_200_OK)
     except Exception as e:
         print(str(e))

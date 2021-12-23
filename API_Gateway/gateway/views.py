@@ -1,8 +1,7 @@
 from django.http import JsonResponse
 import requests
-from rest_framework.response import Response
 from rest_framework.status import *
-from API_Gateway.settings import ADMIN_URL, DOCTOR_URL
+from API_Gateway.settings import ADMIN_URL, DOCTOR_URL, PATIENT_URL
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
 
@@ -40,6 +39,32 @@ def login_doctor(request):
     password = request.POST['password']
     params = {'name': name, 'national_code': national_code, 'password': password}
     res = requests.post(DOCTOR_URL + 'doctor/login_doctor/', data=params)
+    if res.status_code == HTTP_200_OK:
+        return JsonResponse(res.json(), status=HTTP_200_OK)
+    return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def signup_patient(request):
+    name = request.POST['name']
+    national_code = request.POST['national_code']
+    password = request.POST['password']
+    params = {'name': name, 'national_code': national_code, 'password': password}
+    res = requests.post(PATIENT_URL + 'patient/signup_patient/', data=params)
+    if res.status_code == HTTP_201_CREATED:
+        return JsonResponse(res.json(), status=HTTP_200_OK)
+    return JsonResponse(res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def login_patient(request):
+    name = request.POST['name']
+    national_code = request.POST['national_code']
+    password = request.POST['password']
+    params = {'name': name, 'national_code': national_code, 'password': password}
+    res = requests.post(PATIENT_URL + 'patient/login_patient/', data=params)
     if res.status_code == HTTP_200_OK:
         return JsonResponse(res.json(), status=HTTP_200_OK)
     return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
