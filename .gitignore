@@ -9,6 +9,7 @@ API_Gateway/__pycache__/
 API_Gateway/API_Gateway/__pycache__/
 API_Gateway/administrator/__pycache__/
 API_Gateway/administrator/migrations/
+DB_Aggregator/.idea/
 Doctor/.idea/
 Doctor/__pycache__/
 Doctor/Doctor/__pycache__/
@@ -19,3 +20,9 @@ Patient/__pycache__/
 Patient/Patient/__pycache__/
 Patient/system_patient/__pycache__/
 Patient/system_patient/migrations/
+Prescription/.idea/
+Prescription/__pycache__/
+Prescription/Priscription/__pycache__/
+Prescription/system_prescription/__pycache__/
+Prescription/system_prescription/migrations/
+*.iml
