@@ -76,6 +76,7 @@ def login_patient(request):
 def prescript(request):
     try:
         token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+
         doctor_val_res = requests.post(DOCTOR_URL + 'doctor/validate_with_token/', data={'token': token})
         if doctor_val_res.status_code != HTTP_200_OK:
             return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
@@ -84,13 +85,16 @@ def prescript(request):
         if patient_val_res.status_code != HTTP_200_OK:
             return JsonResponse({'error': 'There is no patient with this national code!'}, status=HTTP_404_NOT_FOUND)
         params = {'doctor_id': doctor_val_res.json()['id'], 'patient_id': patient_val_res.json()['id'],
-                  'drugs': request.POST['drugs'], 'date': request.POST.get('date', '0000-01-01')}
+                    'drugs': request.POST['drugs'], 'date': request.POST.get('date', '0000-01-01')}
         prescript_res = requests.post(PRESCRIPTION_URL + 'prescription/new_prescription/', data=params)
         if prescript_res.status_code == HTTP_200_OK:
             return JsonResponse(prescript_res.json(), status=HTTP_201_CREATED)
+        
         return JsonResponse(prescript_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
     except:
-        return JsonResponse({'error': 'Not a doctor'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse({'error': 'Not a doctor wtffffff'}, status=HTTP_401_UNAUTHORIZED)
 
 
 @api_view(('POST',))
@@ -108,4 +112,22 @@ def list_patient_prescriptions(request):
         return JsonResponse(prescription_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
     except:
         return JsonResponse({'error': 'Not a patient'}, status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_doctor_prescriptions(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        doctor_val_res = requests.post(DOCTOR_URL + 'doctor/validate_with_token/', data={'token': token})
+        if doctor_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not a doctor!111'}, status=HTTP_401_UNAUTHORIZED)
+        doctor_id = doctor_val_res.json()['id']
+        prescription_list_res = requests.post(DB_AGGREGATOR_URL + 'list_doctor_prescriptions/', {'id': doctor_id})
+        print("!!!!!!!!!!!!!! ", prescription_list_res)
+        if prescription_list_res.status_code == HTTP_200_OK:
+            return JsonResponse(prescription_list_res.json(), status=HTTP_200_OK)
+        return JsonResponse(prescription_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not a doctor!22222'}, status=HTTP_401_UNAUTHORIZED)
 

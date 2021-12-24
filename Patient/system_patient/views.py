@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.status import *
 from system_patient.models import Patient
+from system_patient.serializer import PatientSerializer
 
 
 @csrf_exempt
@@ -71,3 +72,12 @@ def validate_with_token(request):
             return JsonResponse({}, status=HTTP_403_FORBIDDEN)
     except:
         return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def get_patients(request):
+    ids = request.POST['ids']
+    ids = ids.split(",")
+    patients = Patient.objects.filter(user_ptr_id__in=ids)
+    return JsonResponse(PatientSerializer(patients, many=True).data, status=HTTP_200_OK, safe=False)

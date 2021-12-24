@@ -13,5 +13,6 @@ urlpatterns = [
     path('signup_patient/', views.signup_patient),
     path('login_patient/', views.login_patient),
     path('prescript/', views.prescript),
-    path('list_patient_prescriptions/', views.list_patient_prescriptions)
+    path('list_patient_prescriptions/', views.list_patient_prescriptions),
+    path('list_doctor_prescriptions/', views.list_doctor_prescriptions)
 ]

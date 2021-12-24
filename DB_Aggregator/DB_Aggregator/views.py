@@ -24,3 +24,21 @@ def list_patient_prescriptions(request):
                        'drugs': prescription['drugs'],
                        'date': prescription['date']})
     return JsonResponse({'list': output}, status=HTTP_200_OK, safe=False)
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_doctor_prescriptions(request):
+    doctor_id = request.POST['id']
+    prescriptions_list_res = requests.post(PRESCRIPTION_URL + 'prescription/get_doctor_prescriptions/', {'id': doctor_id})
+    prescriptions_list = prescriptions_list_res.json()
+    list_of_patients_ids = [str(prescription['patient_id']) for prescription in prescriptions_list]
+    patients_res = requests.post(PATIENT_URL + 'patient/get_patients/', {'ids': ",".join(list_of_patients_ids)})
+    patients = {}
+    for patient in patients_res.json():
+        patients[patient['user_ptr_id']] = patient['name']
+    output = []
+    for prescription in prescriptions_list:
+        output.append({'patient_name': patients[prescription['patient_id']],
+                       'drugs': prescription['drugs'],
+                       'date': prescription['date']})
+    return JsonResponse({'list': output}, status=HTTP_200_OK, safe=False)
