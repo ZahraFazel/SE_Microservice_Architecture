@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.status import *
 from system_doctor.models import Doctor
+from system_doctor.serializer import DoctorSerializer
 
 
 @csrf_exempt
@@ -45,7 +46,7 @@ def login(request):
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes((AllowAny,))
-def validate(request):
+def validate_with_token(request):
     token = request.POST['token']
     try:
         id = Token.objects.filter(key=token)[0].user_id
@@ -56,3 +57,13 @@ def validate(request):
             return JsonResponse({}, status=HTTP_403_FORBIDDEN)
     except:
         return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def get_doctors(request):
+    ids = request.POST['ids']
+    ids = ids.split(",")
+    doctors = Doctor.objects.filter(user_ptr_id__in=ids)
+    return JsonResponse(DoctorSerializer(doctors, many=True).data, status=HTTP_200_OK, safe=False)

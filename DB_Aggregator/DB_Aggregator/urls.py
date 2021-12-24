@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from DB_Aggregator import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('list_patient_prescriptions/', views.list_patient_prescriptions, name='list_patient_prescriptions')
 ]

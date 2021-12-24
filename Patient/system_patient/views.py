@@ -45,10 +45,26 @@ def login(request):
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes((AllowAny,))
-def validate(request):
+def validate_with_national_code(request):
     national_code = request.POST['national_code']
     try:
         patient = Patient.objects.filter(national_code=national_code)
+        if len(patient) > 0:
+            return JsonResponse({'id': patient[0].user_ptr_id}, status=HTTP_200_OK)
+        else:
+            return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+    except:
+        return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def validate_with_token(request):
+    token = request.POST['token']
+    try:
+        id = Token.objects.filter(key=token)[0].user_id
+        patient = Patient.objects.filter(user_ptr_id=id)
         if len(patient) > 0:
             return JsonResponse({'id': patient[0].user_ptr_id}, status=HTTP_200_OK)
         else:

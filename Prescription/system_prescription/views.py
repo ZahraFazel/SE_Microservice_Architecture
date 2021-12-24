@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.status import *
 from system_prescription.models import Prescription
+from system_prescription.serializer import PrescriptionSerializer
 
 
 @csrf_exempt
@@ -17,3 +18,12 @@ def new_prescription(request):
     prescription = Prescription.objects.create(doctor_id=doctor_id, patient_id=patient_id, drugs=drugs, date=date)
     prescription.save()
     return JsonResponse({'message': 'Prescription added successfully!'}, status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def get_patient_prescriptions(request):
+    patient_id = request.POST['id']
+    prescriptions = list(Prescription.objects.filter(patient_id=patient_id))
+    return JsonResponse(PrescriptionSerializer(prescriptions, many=True).data, status=HTTP_200_OK, safe=False)
