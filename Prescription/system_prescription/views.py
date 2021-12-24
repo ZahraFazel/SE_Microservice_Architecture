@@ -35,3 +35,10 @@ def get_doctor_prescriptions(request):
     doctor_id = request.POST['id']
     prescriptions = list(Prescription.objects.filter(doctor_id=doctor_id))
     return JsonResponse(PrescriptionSerializer(prescriptions, many=True).data, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def get_admin_prescriptions(request):
+    prescriptions = list(Prescription.objects.all())
+    return JsonResponse(PrescriptionSerializer(prescriptions, many=True).data, status=HTTP_200_OK, safe=False)

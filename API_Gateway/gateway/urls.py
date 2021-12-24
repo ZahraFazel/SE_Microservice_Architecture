@@ -14,5 +14,6 @@ urlpatterns = [
     path('login_patient/', views.login_patient),
     path('prescript/', views.prescript),
     path('list_patient_prescriptions/', views.list_patient_prescriptions),
-    path('list_doctor_prescriptions/', views.list_doctor_prescriptions)
+    path('list_doctor_prescriptions/', views.list_doctor_prescriptions),
+    path('list_admin_prescriptions/', views.list_admin_prescriptions)
 ]

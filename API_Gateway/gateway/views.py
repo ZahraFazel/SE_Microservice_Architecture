@@ -121,13 +121,27 @@ def list_doctor_prescriptions(request):
         token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
         doctor_val_res = requests.post(DOCTOR_URL + 'doctor/validate_with_token/', data={'token': token})
         if doctor_val_res.status_code != HTTP_200_OK:
-            return JsonResponse({'error': 'Not a doctor!111'}, status=HTTP_401_UNAUTHORIZED)
+            return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
         doctor_id = doctor_val_res.json()['id']
         prescription_list_res = requests.post(DB_AGGREGATOR_URL + 'list_doctor_prescriptions/', {'id': doctor_id})
-        print("!!!!!!!!!!!!!! ", prescription_list_res)
         if prescription_list_res.status_code == HTTP_200_OK:
             return JsonResponse(prescription_list_res.json(), status=HTTP_200_OK)
         return JsonResponse(prescription_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
     except:
-        return JsonResponse({'error': 'Not a doctor!22222'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_admin_prescriptions(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        admin_val_res = requests.post(ADMIN_URL + 'system_admin/validate_with_token/', data={'token': token})
+        if admin_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+        prescription_list_res = requests.post(DB_AGGREGATOR_URL + 'list_admin_prescriptions/')
+        if prescription_list_res.status_code == HTTP_200_OK:
+            return JsonResponse(prescription_list_res.json(), status=HTTP_200_OK)
+        return JsonResponse(prescription_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
 
