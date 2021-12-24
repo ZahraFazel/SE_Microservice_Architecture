@@ -1,9 +1,10 @@
 from django.http import JsonResponse
 import requests
 from rest_framework.status import *
-from API_Gateway.settings import ADMIN_URL, DOCTOR_URL, PATIENT_URL
+from API_Gateway.settings import ADMIN_URL, DOCTOR_URL, PATIENT_URL, PRESCRIPTION_URL, AGGREGATOR_URL
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
+from django.utils.timezone import datetime
 
 
 @api_view(('POST',))
@@ -68,3 +69,26 @@ def login_patient(request):
     if res.status_code == HTTP_200_OK:
         return JsonResponse(res.json(), status=HTTP_200_OK)
     return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def prescript(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        doctor_val_res = requests.post(DOCTOR_URL + 'doctor/validate/', data={'token': token})
+        if doctor_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
+        patient_national_code = request.POST['patient_national_code']
+        patient_val_res = requests.post(PATIENT_URL + 'patient/validate/', data={'national_code': patient_national_code})
+        if patient_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'There is no patient with this national code!'}, status=HTTP_404_NOT_FOUND)
+        params = {'doctor_id': doctor_val_res.json()['id'], 'patient_id': patient_val_res.json()['id'],
+                  'drugs': request.POST['drugs'], 'date': request.POST.get('date', '0000-01-01')}
+        prescript_res = requests.post(PRESCRIPTION_URL + 'prescription/new_prescription/', data=params)
+        if prescript_res.status_code == HTTP_200_OK:
+            return JsonResponse(prescript_res.json(), status=HTTP_201_CREATED)
+        return JsonResponse(prescript_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not a doctor'}, status=HTTP_401_UNAUTHORIZED)
+

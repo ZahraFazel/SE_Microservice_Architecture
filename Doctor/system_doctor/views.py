@@ -21,8 +21,7 @@ def signup(request):
         doctor.save()
         token = Token.objects.create(user=doctor)
         return JsonResponse({'token': token.key}, status=HTTP_200_OK)
-    except Exception as e:
-        print(str(e))
+    except:
         return JsonResponse({'error': 'This national code has registered before.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -41,3 +40,19 @@ def login(request):
         return JsonResponse({'error': 'Access denied!'}, status=HTTP_404_NOT_FOUND)
     token = Token.objects.get_or_create(user=user)[0]
     return JsonResponse({'token': token.key}, status=HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def validate(request):
+    token = request.POST['token']
+    try:
+        id = Token.objects.filter(key=token)[0].user_id
+        doctor = Doctor.objects.filter(user_ptr_id=id)
+        if len(doctor) > 0:
+            return JsonResponse({'id': doctor[0].user_ptr_id}, status=HTTP_200_OK)
+        else:
+            return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+    except:
+        return JsonResponse({}, status=HTTP_403_FORBIDDEN)

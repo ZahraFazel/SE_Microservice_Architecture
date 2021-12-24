@@ -1,7 +1,7 @@
 from django.views.generic import RedirectView
 from django.urls import path, include
 
-from API_Gateway.settings import ADMIN_URL, DOCTOR_URL, PATIENT_URL
+from API_Gateway.settings import ADMIN_URL, DOCTOR_URL, PATIENT_URL, AGGREGATOR_URL, PRESCRIPTION_URL
 from gateway import views
 
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('login_doctor/', views.login_doctor),
     path('signup_patient/', views.signup_patient),
     path('login_patient/', views.login_patient),
+    path('prescript/', views.prescript)
 ]
