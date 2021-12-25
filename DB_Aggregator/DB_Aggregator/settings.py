@@ -124,7 +124,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ADMIN_URL = 'http://127.0.0.1:8001/'
 DOCTOR_URL = 'http://127.0.0.1:8002/'
 PATIENT_URL = 'http://127.0.0.1:8003/'
 PRESCRIPTION_URL = 'http://127.0.0.1:8004/'

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 class Patient(User):
     name = models.CharField(max_length=50)
     national_code = models.CharField(max_length=10, unique=True)
+    signup_date = models.DateField()
 
     class Meta:
         permissions = ()

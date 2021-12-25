@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.status import *
 from system_patient.models import Patient
-from system_patient.serializer import PatientSerializer
+from django.utils.timezone import datetime
 
 
 @csrf_exempt
@@ -17,11 +17,14 @@ def signup(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     try:
-        patient = Patient.objects.create(name=name, national_code=national_code, username=name + str(national_code))
+        patient = Patient.objects.create(name=name,
+                                         national_code=national_code,
+                                         signup_date=datetime.now().strftime('%Y-%m-%d'),
+                                         username=name + str(national_code))
         patient.set_password(password)
         patient.save()
         token = Token.objects.create(user=patient)
-        return JsonResponse({'token': token.key}, status=HTTP_200_OK)
+        return JsonResponse({'token': token.key}, status=HTTP_201_CREATED)
     except:
         return JsonResponse({'error': 'This national code has registered before.'}, status=HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -73,18 +76,45 @@ def validate_with_token(request):
     except:
         return JsonResponse({}, status=HTTP_403_FORBIDDEN)
 
+
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
 def get_patients(request):
-    ids = request.POST['ids']
-    ids = ids.split(",")
-    patients = Patient.objects.filter(user_ptr_id__in=ids)
-    return JsonResponse(PatientSerializer(patients, many=True).data, status=HTTP_200_OK, safe=False)
+    ids = request.POST['ids'].split(",")
+    patients = list(Patient.objects.filter(user_ptr_id__in=ids).values_list('user_ptr_id', 'name'))
+    return JsonResponse({'patients': patients}, status=HTTP_200_OK, safe=False)
+
 
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
 def get_all_patients(request):
-    patients = Patient.objects.all()
-    return JsonResponse(PatientSerializer(patients, many=True).data, status=HTTP_200_OK, safe=False)
+    patients = list(Patient.objects.all().values_list('name', flat=True))
+    return JsonResponse({'patients': patients}, status=HTTP_200_OK, safe=False)
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def get_new_patients(request):
+    patients = list(Patient.objects.filter(signup_date=datetime.now().strftime('%Y-%m-%d')).values_list('name', flat=True))
+    return JsonResponse({'patients': patients}, status=HTTP_200_OK, safe=False)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def profile(request):
+    token = request.POST['token']
+    try:
+        id = Token.objects.filter(key=token)[0].user_id
+        patient = Patient.objects.filter(user_ptr_id=id)
+        if len(patient) > 0:
+            return JsonResponse({'name': patient[0].name,
+                                 'national_code': patient[0].national_code,
+                                 'username': patient[0].username}, status=HTTP_200_OK)
+        else:
+            return JsonResponse({}, status=HTTP_403_FORBIDDEN)
+    except:
+        return JsonResponse({}, status=HTTP_403_FORBIDDEN)

@@ -13,7 +13,7 @@ def login_admin(request):
     username = request.POST['username']
     password = request.POST['password']
     params = {'username': username, 'password': password}
-    res = requests.post(ADMIN_URL + 'system_admin/login_admin/', data=params)
+    res = requests.post(ADMIN_URL + 'system_admin/login/', data=params)
     if res.status_code == HTTP_200_OK:
         return JsonResponse(res.json(), status=HTTP_200_OK)
     return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
@@ -26,9 +26,9 @@ def signup_doctor(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     params = {'name': name, 'national_code': national_code, 'password': password}
-    res = requests.post(DOCTOR_URL + 'doctor/signup_doctor/', data=params)
+    res = requests.post(DOCTOR_URL + 'doctor/signup/', data=params)
     if res.status_code == HTTP_201_CREATED:
-        return JsonResponse(res.json(), status=HTTP_200_OK)
+        return JsonResponse(res.json(), status=HTTP_201_CREATED)
     return JsonResponse(res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -39,7 +39,7 @@ def login_doctor(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     params = {'name': name, 'national_code': national_code, 'password': password}
-    res = requests.post(DOCTOR_URL + 'doctor/login_doctor/', data=params)
+    res = requests.post(DOCTOR_URL + 'doctor/login/', data=params)
     if res.status_code == HTTP_200_OK:
         return JsonResponse(res.json(), status=HTTP_200_OK)
     return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
@@ -52,9 +52,9 @@ def signup_patient(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     params = {'name': name, 'national_code': national_code, 'password': password}
-    res = requests.post(PATIENT_URL + 'patient/signup_patient/', data=params)
+    res = requests.post(PATIENT_URL + 'patient/signup/', data=params)
     if res.status_code == HTTP_201_CREATED:
-        return JsonResponse(res.json(), status=HTTP_200_OK)
+        return JsonResponse(res.json(), status=HTTP_201_CREATED)
     return JsonResponse(res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -65,7 +65,7 @@ def login_patient(request):
     national_code = request.POST['national_code']
     password = request.POST['password']
     params = {'name': name, 'national_code': national_code, 'password': password}
-    res = requests.post(PATIENT_URL + 'patient/login_patient/', data=params)
+    res = requests.post(PATIENT_URL + 'patient/login/', data=params)
     if res.status_code == HTTP_200_OK:
         return JsonResponse(res.json(), status=HTTP_200_OK)
     return JsonResponse(res.json(), status=HTTP_401_UNAUTHORIZED)
@@ -76,25 +76,22 @@ def login_patient(request):
 def prescript(request):
     try:
         token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
-
         doctor_val_res = requests.post(DOCTOR_URL + 'doctor/validate_with_token/', data={'token': token})
         if doctor_val_res.status_code != HTTP_200_OK:
             return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
         patient_national_code = request.POST['patient_national_code']
-        patient_val_res = requests.post(PATIENT_URL + 'patient/validate_with_national_code/', data={'national_code': patient_national_code})
+        patient_val_res = requests.post(PATIENT_URL + 'patient/validate_with_national_code/',
+                                        data={'national_code': patient_national_code})
         if patient_val_res.status_code != HTTP_200_OK:
             return JsonResponse({'error': 'There is no patient with this national code!'}, status=HTTP_404_NOT_FOUND)
         params = {'doctor_id': doctor_val_res.json()['id'], 'patient_id': patient_val_res.json()['id'],
-                    'drugs': request.POST['drugs'], 'date': request.POST.get('date', '0000-01-01')}
+                  'drugs': request.POST['drugs'], 'date': request.POST.get('date', datetime.now().strftime('%Y-%m-%d'))}
         prescript_res = requests.post(PRESCRIPTION_URL + 'prescription/new_prescription/', data=params)
         if prescript_res.status_code == HTTP_200_OK:
             return JsonResponse(prescript_res.json(), status=HTTP_201_CREATED)
-        
         return JsonResponse(prescript_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
-
-        
     except:
-        return JsonResponse({'error': 'Not a doctor wtffffff'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
 
 
 @api_view(('POST',))
@@ -130,20 +127,22 @@ def list_doctor_prescriptions(request):
     except:
         return JsonResponse({'error': 'Not a doctor!'}, status=HTTP_401_UNAUTHORIZED)
 
+
 @api_view(('POST',))
 @renderer_classes((JSONRenderer,))
-def list_admin_prescriptions(request):
+def list_prescriptions(request):
     try:
         token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
         admin_val_res = requests.post(ADMIN_URL + 'system_admin/validate_with_token/', data={'token': token})
         if admin_val_res.status_code != HTTP_200_OK:
             return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
-        prescription_list_res = requests.post(DB_AGGREGATOR_URL + 'list_admin_prescriptions/')
+        prescription_list_res = requests.post(DB_AGGREGATOR_URL + 'list_prescriptions/')
         if prescription_list_res.status_code == HTTP_200_OK:
             return JsonResponse(prescription_list_res.json(), status=HTTP_200_OK)
         return JsonResponse(prescription_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
     except:
         return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+
 
 @api_view(('POST',))
 @renderer_classes((JSONRenderer,))
@@ -177,4 +176,56 @@ def list_patients(request):
         return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
 
 
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def get_daily_statistics(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        admin_val_res = requests.post(ADMIN_URL + 'system_admin/validate_with_token/', data={'token': token})
+        if admin_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+        daily_statistics_res = requests.post(DB_AGGREGATOR_URL + 'get_daily_statistics/')
+        if daily_statistics_res.status_code == HTTP_200_OK:
+            return JsonResponse(daily_statistics_res.json(), status=HTTP_200_OK)
+        return JsonResponse(daily_statistics_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
 
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def get_admin_profile(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        admin_profile_res = requests.post(ADMIN_URL + 'system_admin/profile/', data={'token': token})
+        if admin_profile_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse(admin_profile_res.json(), status=HTTP_200_OK)
+    except:
+        return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def get_doctor_profile(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        doctor_profile_res = requests.post(DOCTOR_URL + 'doctor/profile/', data={'token': token})
+        if doctor_profile_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an doctor!'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse(doctor_profile_res.json(), status=HTTP_200_OK)
+    except:
+        return JsonResponse({'error': 'Not an doctor!'}, status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def get_patient_profile(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        patient_profile_res = requests.post(PATIENT_URL + 'patient/profile/', data={'token': token})
+        if patient_profile_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an patient!'}, status=HTTP_401_UNAUTHORIZED)
+        return JsonResponse(patient_profile_res.json(), status=HTTP_200_OK)
+    except:
+        return JsonResponse({'error': 'Not an patient!'}, status=HTTP_401_UNAUTHORIZED)
