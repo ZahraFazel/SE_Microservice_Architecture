@@ -69,3 +69,23 @@ def list_admin_prescriptions(request):
                        'drugs': prescription['drugs'],
                        'date': prescription['date']})
     return JsonResponse({'list': output}, status=HTTP_200_OK, safe=False)
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_doctors(request):
+    doctors_res = requests.post(DOCTOR_URL + 'doctor/get_all_doctors/')
+    doctors = []
+    for doctor in doctors_res.json():
+        doctors.append({'name': doctor['name'],
+                        'national_code': doctor['national_code']})      
+    return JsonResponse({'doctors': doctors}, status=HTTP_200_OK, safe=False)
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_patients(request):
+    patients_res = requests.post(PATIENT_URL + 'patient/get_all_patients/')
+    patients = []
+    for patient in patients_res.json():
+        patients.append({'name': patient['name'],
+                        'national_code': patient['national_code']})      
+    return JsonResponse({'patients': patients}, status=HTTP_200_OK, safe=False)

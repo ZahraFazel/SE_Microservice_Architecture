@@ -15,5 +15,7 @@ urlpatterns = [
     path('prescript/', views.prescript),
     path('list_patient_prescriptions/', views.list_patient_prescriptions),
     path('list_doctor_prescriptions/', views.list_doctor_prescriptions),
-    path('list_admin_prescriptions/', views.list_admin_prescriptions)
+    path('list_admin_prescriptions/', views.list_admin_prescriptions),
+    path('list_doctors/', views.list_doctors),
+    path('list_patients/', views.list_patients)
 ]

@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('list_patient_prescriptions/', views.list_patient_prescriptions, name='list_patient_prescriptions'),
     path('list_doctor_prescriptions/', views.list_doctor_prescriptions, name='list_doctor_prescriptions'),
-    path('list_admin_prescriptions/', views.list_admin_prescriptions, name='list_admin_prescriptions')
-
+    path('list_admin_prescriptions/', views.list_admin_prescriptions, name='list_admin_prescriptions'),
+    path('list_doctors/', views.list_doctors, name='list_doctors'),
+    path('list_patients/', views.list_patients, name='list_patients')
 ]

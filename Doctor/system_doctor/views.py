@@ -67,3 +67,10 @@ def get_doctors(request):
     ids = ids.split(",")
     doctors = Doctor.objects.filter(user_ptr_id__in=ids)
     return JsonResponse(DoctorSerializer(doctors, many=True).data, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def get_all_doctors(request):
+    doctors = Doctor.objects.all()
+    return JsonResponse(DoctorSerializer(doctors, many=True).data, status=HTTP_200_OK, safe=False)

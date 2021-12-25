@@ -81,3 +81,10 @@ def get_patients(request):
     ids = ids.split(",")
     patients = Patient.objects.filter(user_ptr_id__in=ids)
     return JsonResponse(PatientSerializer(patients, many=True).data, status=HTTP_200_OK, safe=False)
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def get_all_patients(request):
+    patients = Patient.objects.all()
+    return JsonResponse(PatientSerializer(patients, many=True).data, status=HTTP_200_OK, safe=False)

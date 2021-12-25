@@ -145,3 +145,36 @@ def list_admin_prescriptions(request):
     except:
         return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
 
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_doctors(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        admin_val_res = requests.post(ADMIN_URL + 'system_admin/validate_with_token/', data={'token': token})
+        if admin_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+        doctor_list_res = requests.post(DB_AGGREGATOR_URL + 'list_doctors/')
+        if doctor_list_res.status_code == HTTP_200_OK:
+            return JsonResponse(doctor_list_res.json(), status=HTTP_200_OK)
+        return JsonResponse(doctor_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer,))
+def list_patients(request):
+    try:
+        token = request.META.get('HTTP_AUTHORIZATION').split(' ')[-1]
+        admin_val_res = requests.post(ADMIN_URL + 'system_admin/validate_with_token/', data={'token': token})
+        if admin_val_res.status_code != HTTP_200_OK:
+            return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+        patient_list_res = requests.post(DB_AGGREGATOR_URL + 'list_patients/')
+        if patient_list_res.status_code == HTTP_200_OK:
+            return JsonResponse(patient_list_res.json(), status=HTTP_200_OK)
+        return JsonResponse(patient_list_res.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+    except:
+        return JsonResponse({'error': 'Not an admin!'}, status=HTTP_401_UNAUTHORIZED)
+
+
+
